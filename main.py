@@ -1,8 +1,8 @@
-import random
-import tkinter as Tk
-from itertools import count
 
+import tkinter as Tk
 import matplotlib.pyplot as plt
+from numpy import random
+from itertools import count
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -30,8 +30,8 @@ def animate(i):
     
     # Generate new random data for the two graphs
     x_vals.append(next(index))
-    y_vals.append(random.randint(0, 5))
-    y_vals2.append(random.randint(0, 5))
+    y_vals.append(random.rand())
+    y_vals2.append(random.rand())
     
     # Get the two axes of the figure
     ax1, ax2 = plt.gcf().get_axes()
@@ -47,6 +47,7 @@ def animate(i):
 # Initialize the GUI window
 root = Tk.Tk()
 root.protocol("WM_DELETE_WINDOW", _quit)
+root.title("Realtime Animated Graphs")
 
 # Set the label for the GUI window
 label = Tk.Label(root, text="Realtime Animated Graphs").grid(column=0, row=0)
