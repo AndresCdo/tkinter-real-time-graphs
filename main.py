@@ -1,67 +1,56 @@
-
-import tkinter as Tk
+import tkinter as tk
 import matplotlib.pyplot as plt
-from numpy import random
-from itertools import count
-from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.animation import FuncAnimation
+import numpy as np
 
-# Set the style for the graphs
-plt.style.use('fivethirtyeight')
+class RealtimeGraphApp:
+    def __init__(self, master):
+        self.master = master
+        master.title("Realtime Animated Graphs")
 
-# Initialize the data lists for the two graphs
-x_vals = []
-y_vals = []
-y_vals2 = []
+        self.label = tk.Label(master, text="Realtime Animated Graphs")
+        self.label.pack()
 
-# Initialize the iterators for the two graphs
-index = count()
-index2 = count()
+        # Create Matplotlib figure and axes
+        self.fig, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(10, 5))
+        self.canvas = FigureCanvasTkAgg(self.fig, master=master)
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
-def _quit():
-    root.quit()    # stops mainloop
+        # Initialize data arrays
+        self.x_data = np.array([])
+        self.y_data1 = np.array([])
+        self.y_data2 = np.array([])
 
-def animate(i):
-    """The function that will be called by the FuncAnimation object to update the graphs.
-    
-    Args:
-    i (int): The frame number (not used in this function).
-    """
-    
-    # Generate new random data for the two graphs
-    x_vals.append(next(index))
-    y_vals.append(random.rand())
-    y_vals2.append(random.rand())
-    
-    # Get the two axes of the figure
-    ax1, ax2 = plt.gcf().get_axes()
-    
-    # Clear the previous data on the axes
-    ax1.cla()
-    ax2.cla()
-    
-    # Plot the new data on the axes
-    ax1.plot(x_vals, y_vals)
-    ax2.plot(x_vals, y_vals2)
+        # Create initial plots
+        self.line1, = self.ax1.plot(self.x_data, self.y_data1)
+        self.line2, = self.ax2.plot(self.x_data, self.y_data2)
 
-# Initialize the GUI window
-root = Tk.Tk()
-root.protocol("WM_DELETE_WINDOW", _quit)
-root.title("Realtime Animated Graphs")
+        # Set plot limits with some padding
+        self.ax1.set_ylim(-1.1, 1.1)  
+        self.ax2.set_ylim(-1.1, 1.1)  
 
-# Set the label for the GUI window
-label = Tk.Label(root, text="Realtime Animated Graphs").grid(column=0, row=0)
+        # Animation function
+        self.ani = FuncAnimation(self.fig, self.update_graph, interval=33, blit=False)
 
-# Initialize the canvas for the two graphs
-canvas = FigureCanvasTkAgg(plt.gcf(), master=root)
-canvas.get_tk_widget().grid(column=0, row=1)
+    def update_graph(self, i):
+        # Generate new data points
+        self.x_data = np.append(self.x_data, i)
+        self.y_data1 = np.append(self.y_data1, np.random.rand())
+        self.y_data2 = np.append(self.y_data2, np.random.rand())
 
-# Create two subplots on the figure for the two graphs
-plt.gcf().subplots(1, 2)
+        # Update plot data
+        self.line1.set_data(self.x_data, self.y_data1)
+        self.line2.set_data(self.x_data, self.y_data2)
 
-# Initialize the FuncAnimation object to update the graphs
-ani = FuncAnimation(plt.gcf(), animate, interval=330, blit=False, save_count=50)
+        # Adjust x-axis limits dynamically
+        self.ax1.relim()  
+        self.ax1.autoscale_view(True, True, False)  
+        self.ax2.relim()
+        self.ax2.autoscale_view(True, True, False)
 
-# Start the GUI event loop
-Tk.mainloop()
-print('Exited')
+        return self.line1, self.line2
+
+root = tk.Tk()
+app = RealtimeGraphApp(root)
+root.mainloop()
